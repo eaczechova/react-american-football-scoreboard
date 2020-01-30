@@ -1,5 +1,5 @@
 //TODO: STEP 1 - Import the useState hook.
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import BottomRow from './BottomRow';
 import Buttons from './Buttons';
@@ -10,21 +10,39 @@ function App() {
 	const initialValueTigers = 0;
 
 	const [valueLions, setValueLions] = useState(initialValueLions);
-	const touchdownLions = () => {
-		setValueLions(valueLions + 7);
-	};
-
-	const fieldGoalLions = () => {
-		setValueLions(valueLions + 3);
-	};
-
 	const [valueTigers, setValueTigers] = useState(initialValueTigers);
-	const touchdownTigers = () => {
-		setValueTigers(valueTigers + 7);
-	};
 
-	const fieldGoalTigers = () => {
-		setValueTigers(valueTigers + 3);
+	let [count, setCount] = useState(0);
+
+	useEffect(() => {
+		let timer;
+
+		if (count > 58) {
+			clearInterval(timer);
+		} else {
+			timer = setInterval(() => {
+				setCount(count + 1);
+			}, 1000);
+		}
+		return () => clearInterval(timer);
+	});
+
+	let [quarter, setQuarter] = useState(1);
+
+	useEffect(() => {
+		count < 15
+			? setQuarter(1)
+			: count < 30
+			? setQuarter(2)
+			: count < 45
+			? setQuarter(3)
+			: setQuarter(4);
+	}, [count]);
+
+	const scoreHandler = (team, amount) => {
+		team === 'home'
+			? setValueLions(valueLions + amount)
+			: setValueTigers(valueTigers + amount);
 	};
 
 	return (
@@ -38,21 +56,16 @@ function App() {
 
 						<div className="home__score">{valueLions}</div>
 					</div>
-					<div className="timer">00:03</div>
+					<div className="timer">{`00 :${count}`}</div>
 					<div className="away">
 						<h2 className="away__name">Tigers</h2>
 						<div className="away__score">{valueTigers}</div>
 					</div>
 				</div>
-				<BottomRow />
+				<BottomRow quarter={quarter} />
 			</section>
 			<section className="buttons">
-				<Buttons
-					onClick1={touchdownLions}
-					onClick2={fieldGoalLions}
-					onClick3={touchdownTigers}
-					onClick4={fieldGoalTigers}
-				/>
+				<Buttons onClick={scoreHandler} />
 			</section>
 		</div>
 	);
